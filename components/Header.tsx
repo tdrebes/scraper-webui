@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 const links = [
-  { href: "#features", label: "Features" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/content", label: "Content" },
+  { href: "/urls", label: "URLs" },
 ];
 
 export default function Header() {
@@ -16,13 +14,29 @@ export default function Header() {
         </Link>
         <nav>
           <ul className="flex items-center gap-6 text-sm font-medium text-neutral-700">
-            {links.map((link) => (
-              <li key={link.href}>
-                <a className="transition hover:text-neutral-950" href={link.href}>
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {links.map((link) => {
+              const isAnchor = link.href.startsWith("#");
+              if (isAnchor) {
+                return (
+                  <li key={link.href}>
+                    <a className="transition hover:text-neutral-950" href={link.href}>
+                      {link.label}
+                    </a>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={link.href}>
+                  <Link
+                    className="transition hover:text-neutral-950"
+                    href={link.href}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>
