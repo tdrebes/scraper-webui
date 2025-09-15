@@ -2,7 +2,9 @@ import Header from "@/components/Header";
 import { unstable_noStore as noStore } from "next/cache";
 import { Pool } from "pg";
 
-type ScrapedContentRecord = {
+import ContentTable from "./ContentTable";
+
+export type ScrapedContentRecord = {
   id: string;
   title: string;
   summary: string;
@@ -144,88 +146,7 @@ export default async function ContentPage() {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
-            <h2 className="text-lg font-semibold text-neutral-900">Latest captures</h2>
-            <span className="text-sm text-neutral-500">
-              {scrapedContent.length} configured URLs
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-neutral-200 text-left text-sm">
-              <thead className="bg-neutral-50 text-neutral-500">
-                <tr>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Title
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Summary
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Source URL
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Captured at
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Tags
-                  </th>
-                  <th scope="col" className="px-6 py-3 font-medium">
-                    Raw text
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 bg-white">
-                {scrapedContent.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
-                      No captures yet. Configure URLs and run your scraper to see results here.
-                    </td>
-                  </tr>
-                ) : (
-                  scrapedContent.map((content) => (
-                    <tr key={content.id} className="align-top transition hover:bg-neutral-50">
-                      <td className="px-6 py-4 text-neutral-900">{content.title}</td>
-                      <td className="px-6 py-4 text-neutral-700">{content.summary}</td>
-                      <td className="px-6 py-4 text-neutral-500">
-                        {content.sourceUrl ? (
-                          <a
-                            className="break-all text-neutral-700 underline-offset-2 transition hover:text-neutral-900 hover:underline"
-                            href={content.sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {content.sourceUrl}
-                          </a>
-                        ) : (
-                          <span className="text-neutral-400">Not provided</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-neutral-600">{content.capturedAt}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          {content.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="max-w-xl text-sm text-neutral-700">
-                          {content.rawText}
-                        </p>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <ContentTable content={scrapedContent} />
       </main>
     </div>
   );
