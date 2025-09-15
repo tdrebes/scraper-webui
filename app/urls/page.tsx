@@ -10,11 +10,10 @@ export default function UrlsPage() {
             URL Monitor
           </p>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Keep a pulse on every page you scrape.
+            Add URLs to monitor for new content.
           </h1>
           <p className="max-w-2xl text-lg text-neutral-600">
-            Track URL health, detect structural changes, and surface the endpoints that power
-            your scrapers. This page will evolve into a detailed view of monitored locations.
+            Keep track of changes on your favorite websites by adding URLs to your monitoring list. Get notified when new content is detected, so you never miss an update.
           </p>
         </section>
 
