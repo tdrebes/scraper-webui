@@ -127,12 +127,10 @@ export default async function ContentPage() {
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div className="space-y-3">
               <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                Review what your configured URLs have captured.
+                Check latest scraped content.
               </h1>
               <p className="max-w-2xl text-lg text-neutral-600">
-                Every entry pulls directly from the monitored URLs on the URLs page. Inspect the
-                captured text, confirm timestamps, and browse tag metadata to keep your downstream
-                systems aligned.
+                Browse recent captures and use the filters to focus on what matters.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
