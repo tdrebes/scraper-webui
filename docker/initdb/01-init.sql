@@ -18,3 +18,10 @@ CREATE INDEX IF NOT EXISTS idx_scraped_content_captured_at
 
 CREATE INDEX IF NOT EXISTS idx_scraped_content_tags
   ON scraped_content USING GIN (tags);
+
+-- Table storing URLs queued or monitored for scraping
+CREATE TABLE IF NOT EXISTS urls (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  url TEXT NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE
+);

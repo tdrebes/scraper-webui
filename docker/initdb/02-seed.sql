@@ -32,3 +32,10 @@ VALUES
     ARRAY['Funding', 'Startups', 'Finance'],
     'Comprehensive list of funding rounds with investor details and company highlights.'
   );
+
+INSERT INTO urls (url, active)
+VALUES
+  ('https://example.com/ai-breakthrough', TRUE),
+  ('https://example.com/ecommerce-trends', TRUE),
+  ('https://example.com/climate-policy', TRUE),
+  ('https://example.com/funding-roundup', FALSE);
