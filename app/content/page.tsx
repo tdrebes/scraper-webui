@@ -48,7 +48,7 @@ function transformRowToRecord(row: ScrapedContentRow): ScrapedContentRecord {
       ? new Date(row.capturedAt)
       : null;
 
-  const tagsSource = row.tags;
+  const tagsSource = row.tags as string[] | string | null;
   const tags = Array.isArray(tagsSource)
     ? tagsSource
     : typeof tagsSource === "string"
