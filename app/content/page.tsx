@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
+import { db, scrapedContent } from "@/lib/db";
+import { desc, sql } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { unstable_noStore as noStore } from "next/cache";
-import { Pool } from "pg";
 
 import ContentTable from "./ContentTable";
 
@@ -14,103 +16,61 @@ export type ScrapedContentRecord = {
   rawText: string;
 };
 
-type GlobalWithPgPool = typeof globalThis & {
-  pgPool?: Pool;
-};
-
-const globalForPg = globalThis as GlobalWithPgPool;
-const connectionString = process.env.DATABASE_URL;
-
-const pool =
-  connectionString &&
-  (globalForPg.pgPool ??
-    new Pool({
-      connectionString,
-      ssl:
-        process.env.NODE_ENV === "production"
-          ? { rejectUnauthorized: false }
-          : undefined,
-    }));
-
-if (pool && process.env.NODE_ENV !== "production") {
-  globalForPg.pgPool = pool;
-}
+type ScrapedContentRow = InferSelectModel<typeof scrapedContent>;
 
 async function loadScrapedContent(): Promise<ScrapedContentRecord[]> {
   noStore();
 
-  if (!pool) {
+  if (!db) {
     console.warn("DATABASE_URL is not set. Returning an empty scraped content list.");
     return [];
   }
 
-  const client = await pool.connect();
-
   try {
-    const { rows } = await client.query<{
-      id: string | null;
-      title: string | null;
-      summary: string | null;
-      source_url: string | null;
-      captured_at: string | Date | null;
-      tags: string[] | string | null;
-      raw_text: string | null;
-    }>(
-      `
-        SELECT
-          id::text AS id,
-          title,
-          summary,
-          source_url,
-          captured_at,
-          tags,
-          raw_text
-        FROM scraped_content
-        ORDER BY captured_at DESC NULLS LAST, id DESC
-        LIMIT 200
-      `,
-    );
+    const rows = await db
+      .select()
+      .from(scrapedContent)
+      .orderBy(sql`${scrapedContent.capturedAt} DESC NULLS LAST`, desc(scrapedContent.id))
+      .limit(200);
 
-    return rows.map((row) => {
-      const capturedAtValue =
-        row.captured_at instanceof Date
-          ? row.captured_at
-          : row.captured_at
-          ? new Date(row.captured_at)
-          : null;
-
-      const tagsSource = row.tags;
-      const tags = Array.isArray(tagsSource)
-        ? tagsSource
-        : typeof tagsSource === "string"
-        ? tagsSource.split(",")
-        : [];
-
-      const fallbackId =
-        row.source_url ??
-        row.title ??
-        row.summary ??
-        (capturedAtValue ? capturedAtValue.toISOString() : undefined) ??
-        `row-${Math.random().toString(36).slice(2)}`;
-
-      return {
-        id: row.id ?? fallbackId,
-        title: row.title ?? "Untitled capture",
-        summary: row.summary ?? "",
-        sourceUrl: row.source_url ?? "",
-        capturedAt: capturedAtValue
-          ? capturedAtValue.toLocaleString()
-          : "Unknown",
-        tags: tags.map((tag) => tag.trim()).filter(Boolean),
-        rawText: row.raw_text ?? "",
-      };
-    });
+    return rows.map(transformRowToRecord);
   } catch (error) {
     console.error("Failed to load scraped content from Postgres", error);
     return [];
-  } finally {
-    client.release();
   }
+}
+
+function transformRowToRecord(row: ScrapedContentRow): ScrapedContentRecord {
+  const capturedAtValue =
+    row.capturedAt instanceof Date
+      ? row.capturedAt
+      : row.capturedAt
+      ? new Date(row.capturedAt)
+      : null;
+
+  const tagsSource = row.tags;
+  const tags = Array.isArray(tagsSource)
+    ? tagsSource
+    : typeof tagsSource === "string"
+    ? tagsSource.split(",")
+    : [];
+
+  const fallbackId =
+    row.sourceUrl ??
+    row.title ??
+    row.summary ??
+    (capturedAtValue ? capturedAtValue.toISOString() : undefined) ??
+    `row-${Math.random().toString(36).slice(2)}`;
+
+  return {
+    id: row.id ?? fallbackId,
+    title: row.title ?? "Untitled capture",
+    summary: row.summary ?? "",
+    sourceUrl: row.sourceUrl ?? "",
+    capturedAt: capturedAtValue ? capturedAtValue.toLocaleString() : "Unknown",
+    tags: tags.map((tag) => tag.trim()).filter(Boolean),
+    rawText: row.rawText ?? "",
+  };
 }
 
 export default async function ContentPage() {
